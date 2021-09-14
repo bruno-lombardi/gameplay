@@ -10,14 +10,14 @@ import AppLoading from 'expo-app-loading'
 import SignIn from './src/screens/SignIn'
 
 const App: React.FC = () => {
-  const [loadingFonts] = useFonts({
+  const [fontsLoading] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Rajdhani_500Medium,
     Rajdhani_700Bold
   })
 
-  if (loadingFonts) {
+  if (!fontsLoading) {
     return <AppLoading />
   }
 
