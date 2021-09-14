@@ -7,7 +7,9 @@ import {
   Rajdhani_700Bold
 } from '@expo-google-fonts/rajdhani'
 import AppLoading from 'expo-app-loading'
-import SignIn from './src/screens/SignIn'
+import { StatusBar } from 'react-native'
+import Router from './src/routes'
+import Background from './src/components/Background'
 
 const App: React.FC = () => {
   const [fontsLoading] = useFonts({
@@ -21,7 +23,16 @@ const App: React.FC = () => {
     return <AppLoading />
   }
 
-  return <SignIn />
+  return (
+    <Background>
+      <StatusBar
+        backgroundColor="transparent"
+        barStyle="light-content"
+        translucent
+      />
+      <Router />
+    </Background>
+  )
 }
 
 export default App
