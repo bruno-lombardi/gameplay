@@ -55,6 +55,10 @@ const Home: React.FC = () => {
     navigation.navigate('AppointmentDetails')
   }, [navigation])
 
+  const handleNavigateToCreate = useCallback(() => {
+    navigation.navigate('AppointmentCreate')
+  }, [navigation])
+
   const handleCategorySelect = useCallback(
     (categoryId: string) =>
       categoryId === category ? setCategory('') : setCategory(categoryId),
@@ -65,7 +69,7 @@ const Home: React.FC = () => {
     <Background>
       <View style={styles.header}>
         <Profile />
-        <ButtonAdd />
+        <ButtonAdd onPress={handleNavigateToCreate} />
       </View>
       <CategorySelect
         categorySelected={category}
