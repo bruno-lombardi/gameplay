@@ -4,17 +4,18 @@ import Home from '../screens/Home'
 import AppointmentDetails from '~/screens/AppointmentDetails'
 import AppointmentCreate from '~/screens/AppointmentCreate'
 import { theme } from '~/global/styles/theme'
+import { AppointmentModel } from '~/models/Appointment'
 
 export type RootStackParamList = {
   SignIn: undefined
   Home: undefined
-  AppointmentDetails: undefined
+  AppointmentDetails: { appointment: AppointmentModel }
   AppointmentCreate: undefined
 }
 
 const { Navigator, Screen } = createNativeStackNavigator<RootStackParamList>()
 
-const AuthRoutes: React.FC = () => {
+const AppRoutes: React.FC = () => {
   return (
     <Navigator
       screenOptions={{
@@ -31,4 +32,4 @@ const AuthRoutes: React.FC = () => {
   )
 }
 
-export default AuthRoutes
+export default AppRoutes

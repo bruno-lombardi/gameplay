@@ -1,7 +1,15 @@
-import React, { createContext, useCallback, useContext, useState } from 'react'
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState
+} from 'react'
 import * as AuthSession from 'expo-auth-session'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { User } from '~/models/User'
 import { api } from '~/services/api'
+import { COLLECTION_USERS } from '~/configs/database'
 
 const { SCOPE } = process.env
 const { CLIENT_ID } = process.env
@@ -13,11 +21,13 @@ type AuthContextData = {
   user: User | null
   loading: boolean
   signIn: () => Promise<void>
+  signOut: () => Promise<void>
 }
 
 type AuthorizationResponse = AuthSession.AuthSessionResult & {
   params: {
-    access_token: string
+    access_token?: string
+    error?: string
   }
 }
 
@@ -35,12 +45,11 @@ function AuthProvider({
     try {
       setLoading(true)
       const authUrl = `${api.defaults.baseURL}/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}`
-
       const response = (await AuthSession.startAsync({
         authUrl
       })) as AuthorizationResponse
 
-      if (response.type === 'success') {
+      if (response.type === 'success' && !response.params.error) {
         api.defaults.headers.authorization = `Bearer ${response.params.access_token}`
 
         const userInfoResponse = await api.get('/users/@me')
@@ -54,6 +63,7 @@ function AuthProvider({
           firstName,
           token: response.params.access_token
         }
+        await AsyncStorage.setItem(COLLECTION_USERS, JSON.stringify(userData))
 
         setUser(userData)
         setLoading(false)
@@ -66,10 +76,28 @@ function AuthProvider({
     }
   }, [])
 
-  // const signOut = useCallback(() => {}, [])
+  const signOut = useCallback(async () => {
+    setUser(null)
+    await AsyncStorage.removeItem(COLLECTION_USERS)
+  }, [])
+
+  const loadUserFromStorage = useCallback(async () => {
+    const storage = await AsyncStorage.getItem(COLLECTION_USERS)
+
+    if (storage) {
+      const userLogged = JSON.parse(storage) as User
+      api.defaults.headers.authorization = `Bearer ${userLogged.token}`
+
+      setUser(userLogged)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadUserFromStorage()
+  }, [loadUserFromStorage])
 
   return (
-    <AuthContext.Provider value={{ user, signIn, loading }}>
+    <AuthContext.Provider value={{ user, signIn, signOut, loading }}>
       {children}
     </AuthContext.Provider>
   )

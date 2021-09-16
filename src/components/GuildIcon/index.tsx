@@ -3,13 +3,15 @@ import { View, Image } from 'react-native'
 import DiscordSvg from '../../assets/discord.svg'
 import { styles } from './styles'
 
+const { CDN_IMAGE } = process.env
+
 type GuildIconProps = {
   guildId: string
   iconId: string | null
 }
 
 const GuildIcon: React.FC<GuildIconProps> = ({ guildId, iconId }) => {
-  const uri = `${null}/icons/${guildId}/${iconId}.png`
+  const uri = `${CDN_IMAGE}/icons/${guildId}/${iconId}.png`
 
   return (
     <View style={styles.container}>

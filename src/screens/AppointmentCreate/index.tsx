@@ -1,7 +1,17 @@
 import { Feather } from '@expo/vector-icons'
-import React, { useState } from 'react'
-import { KeyboardAvoidingView, Platform, Text, View } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import React, { useCallback, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Text,
+  View
+} from 'react-native'
 import { RectButton, ScrollView } from 'react-native-gesture-handler'
+import uuid from 'react-native-uuid'
 import Button from '~/components/Button'
 import CategorySelect from '~/components/CategorySelect'
 import GuildIcon from '~/components/GuildIcon'
@@ -10,14 +20,30 @@ import ModalView from '~/components/ModalView'
 import SmallInput from '~/components/SmallInput'
 import TextArea from '~/components/TextArea'
 import { theme } from '~/global/styles/theme'
+import useAppointmentsRepository from '~/hooks/useAppointmentsRepository'
 import { GuildModel } from '~/models/Guild'
+import { RootStackParamList } from '~/routes/app-routes'
 import Guilds from '../Guilds'
 import { styles } from './styles'
+
+type CreateAppointmentForm = {
+  day: string
+  month: string
+  hour: string
+  minute: string
+  description: string
+}
 
 const AppointmentCreate: React.FC = () => {
   const [category, setCategory] = useState('')
   const [guild, setGuild] = useState<GuildModel>({} as GuildModel)
   const [openGuildsModal, setOpenGuildsModal] = useState(false)
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>()
+
+  const { handleSubmit, control } = useForm<CreateAppointmentForm>()
+
+  const { saveAppointment, loading } = useAppointmentsRepository()
 
   const handleCategorySelect = (categoryId: string) => setCategory(categoryId)
 
@@ -29,6 +55,21 @@ const AppointmentCreate: React.FC = () => {
     setGuild(guildSelect)
     setOpenGuildsModal(false)
   }
+
+  const onSubmit = useCallback(
+    async (data: CreateAppointmentForm) => {
+      const newAppointment = {
+        id: uuid.v4() as string,
+        guild,
+        category,
+        date: `${data.day}/${data.month} às ${data.hour}:${data.minute}h`,
+        description: data.description
+      }
+      await saveAppointment(newAppointment)
+      navigation.navigate('Home')
+    },
+    [category, saveAppointment, navigation, guild]
+  )
 
   return (
     <KeyboardAvoidingView
@@ -57,7 +98,7 @@ const AppointmentCreate: React.FC = () => {
           <RectButton onPress={handleOpenGuilds}>
             <View style={styles.select}>
               {guild.icon ? (
-                <GuildIcon guildId="" iconId={null} />
+                <GuildIcon guildId={guild.id} iconId={guild.icon} />
               ) : (
                 <View style={styles.image} />
               )}
@@ -81,9 +122,9 @@ const AppointmentCreate: React.FC = () => {
               <Text style={styles.label}>Dia e mês</Text>
 
               <View style={styles.column}>
-                <SmallInput maxLength={2} />
+                <SmallInput maxLength={2} name="day" control={control} />
                 <Text style={styles.divider}>/</Text>
-                <SmallInput maxLength={2} />
+                <SmallInput maxLength={2} name="month" control={control} />
               </View>
             </View>
 
@@ -91,9 +132,9 @@ const AppointmentCreate: React.FC = () => {
               <Text style={styles.label}>Hora e minuto</Text>
 
               <View style={styles.column}>
-                <SmallInput maxLength={2} />
+                <SmallInput maxLength={2} name="hour" control={control} />
                 <Text style={styles.divider}>:</Text>
-                <SmallInput maxLength={2} />
+                <SmallInput maxLength={2} name="minute" control={control} />
               </View>
             </View>
           </View>
@@ -109,10 +150,19 @@ const AppointmentCreate: React.FC = () => {
             maxLength={100}
             numberOfLines={5}
             autoCorrect={false}
+            name="description"
+            control={control}
           />
 
           <View style={styles.footer}>
-            <Button title="Agendar" />
+            {loading ? (
+              <ActivityIndicator color={theme.colors.primary} />
+            ) : (
+              <Button
+                title="Agendar"
+                onPress={() => handleSubmit(onSubmit)()}
+              />
+            )}
           </View>
         </View>
       </ScrollView>
