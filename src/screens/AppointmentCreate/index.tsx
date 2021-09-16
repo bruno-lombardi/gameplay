@@ -19,6 +19,8 @@ const AppointmentCreate: React.FC = () => {
   const [guild, setGuild] = useState<GuildModel>({} as GuildModel)
   const [openGuildsModal, setOpenGuildsModal] = useState(false)
 
+  const handleCategorySelect = (categoryId: string) => setCategory(categoryId)
+
   const handleOpenGuilds = () => setOpenGuildsModal(true)
 
   const handleCloseGuilds = () => setOpenGuildsModal(false)
@@ -47,7 +49,7 @@ const AppointmentCreate: React.FC = () => {
 
         <CategorySelect
           hasCheckBox
-          setCategory={setCategory}
+          setCategory={handleCategorySelect}
           categorySelected={category}
         />
 

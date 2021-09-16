@@ -87,6 +87,7 @@ const Home: React.FC = () => {
           style={styles.matches}
           showsVerticalScrollIndicator={false}
           ItemSeparatorComponent={() => <ListDivider />}
+          contentContainerStyle={{ paddingBottom: 69 }}
         />
       </View>
     </Background>

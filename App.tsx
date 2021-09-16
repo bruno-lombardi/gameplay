@@ -10,6 +10,7 @@ import AppLoading from 'expo-app-loading'
 import { StatusBar } from 'react-native'
 import Router from './src/routes'
 import Background from './src/components/Background'
+import { AuthProvider } from '~/contexts/auth'
 
 const App: React.FC = () => {
   const [fontsLoading] = useFonts({
@@ -30,7 +31,9 @@ const App: React.FC = () => {
         barStyle="light-content"
         translucent
       />
-      <Router />
+      <AuthProvider>
+        <Router />
+      </AuthProvider>
     </Background>
   )
 }

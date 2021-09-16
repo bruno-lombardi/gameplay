@@ -1,20 +1,22 @@
 import React, { useCallback } from 'react'
-import { View, Image, Text } from 'react-native'
-import { useNavigation } from '@react-navigation/native'
-import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { View, Image, Text, Alert, ActivityIndicator } from 'react-native'
 import { styles } from './styles'
 
 import SignInIllustration from '../../assets/illustration.png'
 import ButtonIcon from '../../components/ButtonIcon'
-import { RootStackParamList } from '../../routes/auth-routes'
+import { useAuth } from '~/contexts/auth'
+import { theme } from '~/global/styles/theme'
 
 const SignIn: React.FC = () => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList, 'Home'>>()
+  const { signIn, loading } = useAuth()
 
-  const handleSignIn = useCallback(() => {
-    navigation.navigate('Home')
-  }, [navigation])
+  const handleSignIn = useCallback(async () => {
+    try {
+      await signIn()
+    } catch (err) {
+      Alert.alert('Ocorreu um erro.', String(err))
+    }
+  }, [signIn])
 
   return (
     <View style={styles.container}>
@@ -36,7 +38,11 @@ const SignIn: React.FC = () => {
           favoritos com seus amigos
         </Text>
 
-        <ButtonIcon title="Entrar com Discord" onPress={handleSignIn} />
+        {loading ? (
+          <ActivityIndicator color={theme.colors.primary} />
+        ) : (
+          <ButtonIcon title="Entrar com Discord" onPress={handleSignIn} />
+        )}
       </View>
     </View>
   )
